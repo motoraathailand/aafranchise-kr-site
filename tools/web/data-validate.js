@@ -14,7 +14,7 @@ export function validateData(j, cur = { meta: {}, brands: [] }) {
   if (j.meta.count != null && j.meta.count !== n) return bad('meta-count');
   const seen = new Set(); let money = 0;
   for (const b of j.brands) {
-    if (!b || typeof b.id !== 'string' || !/^kr\d{4,20}$/.test(b.id) || seen.has(b.id) || !b.name || typeof b.name !== 'object' || !(b.name.ko || b.name.en) || !GROUPS.includes(b.group)) return bad('brand');
+    if (!b || typeof b.id !== 'string' || !/^kr\d{4,20}(?:\.[a-fA-F0-9]{16})?$/.test(b.id) || seen.has(b.id) || !b.name || typeof b.name !== 'object' || !(b.name.ko || b.name.en) || !GROUPS.includes(b.group)) return bad('brand');
     seen.add(b.id); if ((b.totalInvestment && b.totalInvestment.min != null) || (b.franchiseFee && b.franchiseFee.min != null)) money++;
   }
   if (j.meta.feeCoverageRequired === true && money < n * 0.5) return bad('empty-fees');

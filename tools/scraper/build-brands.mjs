@@ -1,13 +1,12 @@
 import fs from 'node:fs';
-import { makeBrand,parseBrandList,LIST } from './scraper-lib.mjs';
-import { makeMeta } from './weekly-lib.mjs';
-const args=process.argv.slice(2),out=args.includes('--out')?args[args.indexOf('--out')+1]:'docs/data/brands.json';
-const info=fs.existsSync('tools/data/cache/listing-meta.json')?JSON.parse(fs.readFileSync('tools/data/cache/listing-meta.json')):{};
-const fetchedAt=info.fetchedAt||new Date().toISOString(),listedAt=process.env.KFTC_LIST_DATE||info.listedAt||new Date().toISOString().slice(0,10);
-const rows=parseBrandList(fs.readFileSync('tools/data/cache/latest-list.html','utf8'));
-const brands=[...new Map(rows.map(x=>[x.registrationNo,x])).values()].map(x=>makeBrand(x,{fetchedAt,listedAt}));
-if(brands.length<100)throw Error('Too few rows');
-const d={meta:{schema:1,version:Number(listedAt.replaceAll('-','')),generatedAt:fetchedAt,count:brands.length,scope:'Verified KFTC public catalog records; undisclosed money fields omitted',country:'South Korea',currency:'KRW',feeCoverageRequired:false,coverage:{catalogFieldsVerified:brands.length,withFranchiseFee:0,withTotalInvestment:0,withRoyalty:0,withBranches:0},sources:[{id:'kftc',name:'공정거래위원회 가맹사업정보제공시스템',url:LIST}],asofMax:listedAt},brands};
-fs.mkdirSync('docs/data',{recursive:true});fs.writeFileSync(out,JSON.stringify(d));
-if(!args.includes('--out'))fs.writeFileSync('docs/data/meta.json',JSON.stringify(makeMeta(d,JSON.stringify(d),fetchedAt),null,1)+'\n');
-console.log(`${brands.length} verified KFTC brands`);
+import { buildCatalog } from './api-catalog.mjs';
+import { groupFor } from './scraper-lib.mjs';
+const cache='tools/data/cache';
+const load=(kind)=>fs.readdirSync(cache).filter(f=>new RegExp(`^api-${kind}-(\\d+)-(\\d+)\\.json$`).test(f)).sort((a,b)=>a.localeCompare(b,undefined,{numeric:true})).flatMap(f=>JSON.parse(fs.readFileSync(`${cache}/${f}`,'utf8')).records);
+const rows=load('brand'); if(rows.length<100)throw new Error('Use npm run scrape with the approved secret first; never fabricate API brand rows');
+const oi=process.argv.indexOf('--out');const out=oi>=0?process.argv[oi+1]:'web/data/brands.json';if(!out||out.startsWith('--'))throw new Error('--out path required');
+const data=buildCatalog(rows,load('money'),{groupFor,version:Number(process.env.DATA_VERSION||new Date().toISOString().slice(0,10).replaceAll('-',''))});
+fs.mkdirSync(out.substring(0,out.lastIndexOf('/'))||'.',{recursive:true});fs.writeFileSync(out,JSON.stringify(data));
+console.log(`Built ${data.brands.length} API brands; ${data.meta.coverage.withTotalInvestment} matched KFTC startup totals. Money fields retain spec-approved fields only.`);
+
+const metaPath='.next-meta.json'; const text=fs.readFileSync(out,'utf8');const{makeMeta}=await import('./weekly-lib.mjs');fs.writeFileSync(metaPath,JSON.stringify(makeMeta(data,text),null,1)+'\n');

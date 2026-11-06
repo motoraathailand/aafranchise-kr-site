@@ -1,11 +1,3 @@
-import fs from 'node:fs';
-import { LIST, parseBrandList, politeFetch } from './scraper-lib.mjs';
-const limit = Number(process.env.FTC_LIMIT || 300);
-const html = await politeFetch(`${LIST}?pageUnit=${limit}&pageIndex=1`, { cache: 'tools/data/cache' });
-const fetchedAt=new Date().toISOString();
-fs.mkdirSync('tools/data/cache',{recursive:true});
-fs.writeFileSync('tools/data/cache/latest-list.html',html);
-fs.writeFileSync('tools/data/cache/listing-meta.json',JSON.stringify({fetchedAt,listedAt:fetchedAt.slice(0,10)}));
-const rows=parseBrandList(html);
-if(rows.length<Math.min(limit,100))throw new Error(`KFTC returned only ${rows.length} usable rows`);
-console.log(`KFTC public catalog: ${rows.length} rows cached; a later API run can enrich exact fields.`);
+import { collectOfficial } from './api-catalog.mjs';
+try { const r=await collectOfficial({cache:'tools/data/cache'}); if(process.env.DATA_GO_KR_REQUIRED==='1'&&!r)throw new Error('DATA_GO_KR_SERVICE_KEY is required'); }
+catch(e){console.error(e.message);if(process.env.DATA_GO_KR_REQUIRED==='1')process.exitCode=1;}

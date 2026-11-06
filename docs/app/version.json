@@ -1,27 +1,27 @@
 {
- "packageName": "com.motoraa.franchisekr",
- "latestVersionCode": 1,
- "minVersionCode": 1,
- "latestVersionName": "0.1.0",
- "playUrl": "https://play.google.com/store/apps/details?id=com.motoraa.franchisekr",
- "notices": [
-  {
-   "id": "kr-welcome-1",
-   "at": "2026-11-06",
-   "title": {
-    "ko": "처음 만나요",
-    "en": "Welcome",
-    "th": "ยินดีต้อนรับ",
-    "zh": "欢迎",
-    "hi": "स्वागत"
-   },
-   "body": {
-    "ko": "실제 공정위 공개 목록의 300개 브랜드와 등록번호·업종·최초등록일을 확인할 수 있어요. 미확인 금액·점포 수는 포함하지 않았어요. 투자 전 공식 정보공개서와 가맹본부에 반드시 확인하세요.",
-    "en": "This Korean guide includes 300 real brands from the KFTC public disclosure list. Unverified fees and store counts are omitted. Check the official disclosure and brand before investing.",
-    "th": "คู่มือเกาหลีใต้นี้มี 300 แบรนด์จริงจากรายการเปิดเผยข้อมูล KFTC ไม่มีค่าใช้จ่ายและจำนวนสาขาที่ยังไม่ได้ยืนยัน",
-    "zh": "本韩国指南包含公平交易委员会公开目录的300个真实品牌，不包含未经核实的费用或门店数。投资前请查证官方信息。",
-    "hi": "इस कोरियाई गाइड में KFTC सार्वजनिक सूची के 300 वास्तविक ब्रांड हैं। अपुष्ट शुल्क और स्टोर संख्या शामिल नहीं हैं।"
-   }
-  }
- ]
+  "packageName": "com.motoraa.franchisekr",
+  "latestVersionCode": 2,
+  "minVersionCode": 1,
+  "latestVersionName": "0.1.1",
+  "playUrl": "https://play.google.com/store/apps/details?id=com.motoraa.franchisekr",
+  "notices": [
+    {
+      "id": "kr-api-2025",
+      "at": "2026-11-06",
+      "title": {
+        "ko": "정식 공공데이터 보강",
+        "en": "Official API enrichment",
+        "th": "เพิ่มข้อมูล API ทางการ",
+        "zh": "官方API数据更新",
+        "hi": "आधिकारिक API डेटा"
+      },
+      "body": {
+        "ko": "2025년 공정위 브랜드 11,166개 중 10,621개에 브랜드·법인·업종이 일치하는 창업금액을 제공합니다. 인테리어·매출·점포 수가 없는 경우 추정하지 않습니다.",
+        "en": "2025 KFTC data covers 11,166 brands and precisely matched startup amounts for 10,621. Unavailable interior, sales and outlet fields are never estimated.",
+        "th": "ข้อมูล KFTC ปี 2025 มี 11,166 แบรนด์ และยอดเริ่มต้นที่ตรงกัน 10,621 แบรนด์ ไม่คาดคะเนค่าตกแต่ง ยอดขาย หรือจำนวนสาขา",
+        "zh": "2025年KFTC数据涵盖11,166个品牌，10,621个拥有精确匹配的创业金额。未获得的装修、销售和门店信息不作估计。",
+        "hi": "2025 KFTC डेटा में 11,166 ब्रांड और 10,621 सटीक मिलान स्टार्ट-अप राशि हैं। अनुपलब्ध इंटीरियर, बिक्री व आउटलेट का अनुमान नहीं लगाया गया।"
+      }
+    }
+  ]
 }

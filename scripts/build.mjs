@@ -69,7 +69,7 @@ const photo = (n, i = 0, alt = 'alt' + n) => `<img data-shot="${n}" src="${shotN
 const JOINBTN = (key, extra = '') => `<a class="btn" data-press data-ripple data-int href="join.html"><svg viewBox="0 0 24 24" aria-hidden="true">${ICON.download}</svg><span data-t="${key}">${esc(I.ko[key])}</span></a>`;
 const showcase = [['search', 'cur', 1], ['compare', 'unit', 3], ['ai', 'calc', 5]];
 const perks = [['offline', 'pk1'], ['user', 'pk2'], ['doc', 'pk3'], ['globe', 'pk4'], ['free', 'pk5'], ['moon', 'pk6']];
-const stats = [[300, 'stat1'], [18, 'stat2'], [5, 'stat3'], [0, 'stat4']];
+const stats = [[11166, 'stat1'], [18, 'stat2'], [5, 'stat3'], [0, 'stat4']];
 const indexBody = `${HEADER(I)}
 <main id="main">
 <section class="hero"><div class="wrap hero-in">

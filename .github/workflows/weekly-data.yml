@@ -1,6 +1,6 @@
 name: Weekly brand data refresh
 
-# Re-scrapes KFTC public catalog (politely: robots.txt, 1.6 s delay, identifying User-Agent), checks the result and,
+# Uses the two approved KFTC public-data APIs (politely: robots.txt, 1.6 s delay, identifying User-Agent), checks the result and,
 # if the checks pass, commits to main (GitHub Pages serves docs/): new docs/data/brands.json + meta.json (new version) when the data changed,
 # otherwise only a heartbeat (meta.json 'checkedAt'; version unchanged so apps do not re-download). The weekly commit also keeps the repo active,
 # so GitHub does not disable the schedule after 60 days of inactivity. If a check fails the job fails and nothing is committed.
@@ -32,11 +32,19 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: '22'
+      - name: Check required credential is configured
+        env:
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+        run: test -n "$DATA_GO_KR_SERVICE_KEY"
       - name: Scrape, check, build
         id: refresh
         env:
           FORCE: ${{ inputs.force }}
+          DATA_GO_KR_SERVICE_KEY: ${{ secrets.DATA_GO_KR_SERVICE_KEY }}
+          DATA_GO_KR_REQUIRED: '1'
         run: node tools/weekly-refresh.mjs
+      - name: Test publication
+        run: node tools/check-publication.mjs
       - name: Commit and push
         if: steps.refresh.outputs.heartbeat == 'true'
         run: |
