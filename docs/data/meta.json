@@ -1,7 +1,7 @@
 {
- "version": 2026110601,
+ "version": 2026110602,
  "count": 11166,
- "generatedAt": "2026-11-06T15:37:33.670Z",
+ "generatedAt": "2026-11-06T15:51:48.787Z",
  "asofMax": "2026-11-06",
  "feeCoverageRequired": true,
  "referenceYear": 2025,
@@ -17,6 +17,6 @@
   "withAverageSales": 0
  },
  "bytes": 17547883,
- "sha256": "d3b62d5a243735e8a12e3a054137ea158d3116161ab13ceb9d5b698cc5ae421c",
- "checkedAt": "2026-11-06T15:37:34.701Z"
+ "sha256": "9811fa8248262fe2938d47c145ec479a7bdb08096c8ae419724b2f14c938bf29",
+ "checkedAt": "2026-11-06T15:51:49.585Z"
 }
