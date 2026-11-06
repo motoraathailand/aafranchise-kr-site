@@ -78,6 +78,7 @@ jobs:
       group: pages
       cancel-in-progress: false
     runs-on: ubuntu-latest
+    timeout-minutes: 25
     steps:
       # refresh commits within this same run; checkout the resulting main, not the original event SHA.
       - uses: actions/checkout@v4
