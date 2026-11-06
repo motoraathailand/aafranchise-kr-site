@@ -1,0 +1,1 @@
+Static documents are deployed by pages.yml only (concurrency: pages, cancel-in-progress: false). The weekly job calls workflow_call after successful publication.
