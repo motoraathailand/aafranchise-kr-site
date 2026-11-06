@@ -1,10 +1,22 @@
 {
- "version": 20261106,
- "count": 300,
- "generatedAt": "2026-11-06T13:48:53.333Z",
+ "version": 20261107,
+ "count": 11166,
+ "generatedAt": "2026-11-06T14:59:44.435Z",
  "asofMax": "2026-11-06",
- "feeCoverageRequired": false,
- "bytes": 183012,
- "sha256": "52b8efd59f87ec34f4b221b7e5cac9a06773e378fb13d2ff8465ddc18c37040e",
- "checkedAt": "2026-11-06T14:04:54.115Z"
+ "feeCoverageRequired": true,
+ "referenceYear": 2025,
+ "coverage": {
+  "catalogFieldsVerified": 11166,
+  "withFranchiseFee": 10621,
+  "withTotalInvestment": 10621,
+  "withEducationFee": 10621,
+  "withDeposit": 10621,
+  "withOtherStartupCost": 10621,
+  "withRoyalty": 0,
+  "withBranches": 0,
+  "withAverageSales": 0
+ },
+ "bytes": 17539198,
+ "sha256": "4b43b74de09f20bf0821a8f0d637994a30db69f60c0ec2b7b68a394f8021768f",
+ "checkedAt": "2026-11-06T14:59:45.170Z"
 }
