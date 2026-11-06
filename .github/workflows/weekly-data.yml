@@ -14,6 +14,10 @@ on:
         description: 'Publish even if the content did not change (bumps meta.version)'
         type: boolean
         default: false
+      deploy_only:
+        description: 'Deploy currently checked-in docs (no KFTC refresh)'
+        type: boolean
+        default: false
 
 permissions:
   contents: write
@@ -25,10 +29,8 @@ concurrency:
 
 jobs:
   refresh:
+    if: inputs.deploy_only != true
     outputs:
-      checked: ${{ steps.refresh.outputs.checkedAt }}
-      count: ${{ steps.refresh.outputs.count }}
-      want: ${{ steps.refresh.outputs.version }}
       heartbeat: ${{ steps.refresh.outputs.heartbeat }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -64,7 +66,7 @@ jobs:
 
   deploy:
     needs: refresh
-    if: needs.refresh.outputs.heartbeat == 'true'
+    if: inputs.deploy_only == true || needs.refresh.outputs.heartbeat == 'true'
     environment:
       name: github-pages
       url: ${{ steps.upload.outputs.page_url }}
@@ -86,10 +88,15 @@ jobs:
         with: {path: docs}
       - id: upload
         uses: actions/deploy-pages@v5
+      - name: Read expected data from this exact deployment
+        id: data
+        run: |
+          node tools/check-publication.mjs
+          printf 'version=%s\ncount=%s\n' "$(node -p 'require("./docs/data/brands.json").meta.version')" "$(node -p 'require("./docs/data/brands.json").brands.length')" >> "$GITHUB_OUTPUT"
       - name: Verify deployed public data
         env:
-          WANT: "${{ needs.refresh.outputs.version }}"
-          COUNT: "${{ needs.refresh.outputs.count }}"
+          WANT: "${{ steps.data.outputs.version }}"
+          COUNT: "${{ steps.data.outputs.count }}"
         run: |
           BASE=https://motoraathailand.github.io/aafranchise-kr-site/data
           for i in $(seq 1 40); do
