@@ -25,6 +25,11 @@ concurrency:
 
 jobs:
   refresh:
+    outputs:
+      checked: ${{ steps.refresh.outputs.checkedAt }}
+      count: ${{ steps.refresh.outputs.count }}
+      want: ${{ steps.refresh.outputs.version }}
+      heartbeat: ${{ steps.refresh.outputs.heartbeat }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
