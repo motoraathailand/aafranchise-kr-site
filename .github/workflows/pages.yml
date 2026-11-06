@@ -4,7 +4,11 @@ on:
     branches: [main]
     paths: ['docs/**']
   workflow_dispatch: {}
-  workflow_call: {}
+  workflow_call:
+    inputs:
+      want: {type: string, required: false, default: ''}
+      count: {type: string, required: false, default: ''}
+      checked: {type: string, required: false, default: ''}
 permissions: {contents: read, pages: write, id-token: write}
 concurrency: {group: pages, cancel-in-progress: false}
 jobs:
@@ -18,3 +22,19 @@ jobs:
         with: {path: docs}
       - id: upload
         uses: actions/deploy-pages@v5
+      - name: Verify deployed public data (weekly calls pass expected values)
+        if: inputs.want != ''
+        env: {WANT: ${{ inputs.want }}, COUNT: ${{ inputs.count }}, CHK: ${{ inputs.checked }}}
+        run: |
+          BASE=https://motoraathailand.github.io/aafranchise-kr-site/data
+          for i in $(seq 1 40); do
+            m="$(curl -fsS "$BASE/meta.json?cb=$RANDOM$i" | python3 -c 'import json,sys;j=json.load(sys.stdin);print(j["version"],j.get("checkedAt",""))' || echo none)"
+            echo "live check $i: $m / want $WANT $CHK"
+            if [ "$m" = "$WANT $CHK" ]; then
+              curl -fsS -D /tmp/h "$BASE/brands.json?cb=$RANDOM" -o /tmp/b.json
+              node -e 'const b=require("/tmp/b.json");if(b.meta.version!==Number(process.env.WANT)||b.brands.length!==Number(process.env.COUNT))process.exit(1)'
+              grep -qi "access-control-allow-origin: \*" /tmp/h && exit 0; exit 1
+            fi
+            sleep 20
+          done
+          exit 1

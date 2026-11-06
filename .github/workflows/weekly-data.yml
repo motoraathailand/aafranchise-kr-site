@@ -17,6 +17,7 @@ on:
 
 permissions:
   contents: write
+  pages: write
 
 concurrency:
   group: brand-data
@@ -25,6 +26,9 @@ concurrency:
 jobs:
   refresh:
     outputs:
+      checked: ${{ steps.refresh.outputs.checkedAt }}
+      count: ${{ steps.refresh.outputs.count }}
+      want: ${{ steps.refresh.outputs.version }}
       heartbeat: ${{ steps.refresh.outputs.heartbeat }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
@@ -56,38 +60,13 @@ jobs:
           git commit -m "${{ steps.refresh.outputs.message }}"
           git pull --rebase -q origin main
           git push origin HEAD:main
-      - name: Verify the live URL serves the result
-        if: steps.refresh.outputs.heartbeat == 'true'
-        env:
-          GH_TOKEN: ${{ github.token }}
-          WANT: ${{ steps.refresh.outputs.version }}
-          COUNT: ${{ steps.refresh.outputs.count }}
-          CHK: ${{ steps.refresh.outputs.checkedAt }}
-          CHANGED: ${{ steps.refresh.outputs.changed }}
-        run: |
-          BASE="https://motoraathailand.github.io/aafranchise-kr-site/data"
-          for i in $(seq 1 40); do
-            m=$(curl -fsS "$BASE/meta.json?cb=$RANDOM$i" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d["version"],d.get("checkedAt",""))' 2>/dev/null || echo "none")
-            echo "try $i: live meta = $m (want $WANT $CHK)"
-            if [ "$m" = "$WANT $CHK" ]; then
-              curl -fsS -D /tmp/h "$BASE/brands.json?cb=$RANDOM" -o /tmp/b.json
-              python3 - <<'PY'
-          import json, os
-          j = json.load(open('/tmp/b.json'))
-          assert j['meta']['version'] == int(os.environ['WANT']) and len(j['brands']) == int(os.environ['COUNT']), 'live brands.json mismatch'
-          hdr = open('/tmp/h').read().lower()
-          assert 'access-control-allow-origin: *' in hdr, 'CORS header missing'
-          print('live OK:', j['meta']['version'], len(j['brands']), 'brands, CORS *, data changed =', os.environ['CHANGED'])
-          PY
-              exit 0
-            fi
-            
-            sleep 20
-          done
-          echo "::error::live URL did not serve version $WANT / checkedAt $CHK within ~13 minutes"; exit 1
-
-  # One Pages pipeline and one queue; called only after this data commit is on main.
+  # Pages and live verification form one serialized job after the collection commit.
   deploy:
     needs: refresh
     if: needs.refresh.outputs.heartbeat == 'true'
     uses: ./.github/workflows/pages.yml
+    with:
+      want: ${{ needs.refresh.outputs.want }}
+      count: ${{ needs.refresh.outputs.count }}
+      checked: ${{ needs.refresh.outputs.checked }}
+    secrets: inherit
