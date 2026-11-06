@@ -1,0 +1,30 @@
+name: Static site deployment
+# docs/ is an already-rendered HTML/JSON site. No Jekyll or app build is necessary.
+on:
+  push:
+    branches: [main]
+    paths: ['docs/**', '.github/workflows/static-pages.yml']
+  workflow_dispatch:
+permissions:
+  contents: read
+  pages: write
+  id-token: write
+concurrency:
+  group: pages-static-kr
+  cancel-in-progress: false
+jobs:
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    steps:
+      - name: Disable legacy-branch builds for this artifact deployment
+        env: {GH_TOKEN: ${{ github.token }}}
+        run: gh api --method PUT repos/${{ github.repository }}/pages -f build_type=workflow || echo 'Repository Pages setting needs admin access; the artifact deployment may still supersede it.'
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with: {path: docs}
+      - id: deployment
+        uses: actions/deploy-pages@v5
