@@ -1,5 +1,13 @@
-import fs from 'node:fs';import { makeBrand, parseBrandList, LIST } from './scraper-lib.mjs';import { makeMeta } from './weekly-lib.mjs';
-const out=process.argv.includes('--out')?process.argv[process.argv.indexOf('--out')+1]:'docs/data/brands.json',cache=metaFile.fetchedAt||new Date().toISOString(),date=process.env.KFTC_LIST_DATE||metaFile.listedAt||new Date().toISOString().slice(0,10);
-const metaFile=fs.existsSync('tools/data/cache/listing-meta.json')?JSON.parse(fs.readFileSync('tools/data/cache/listing-meta.json')):{};
-const rows=parseBrandList(fs.readFileSync('tools/data/cache/latest-list.html','utf8'));const brands=[...new Map(rows.map(x=>[x.registrationNo,x])).values()].map(x=>makeBrand(x,{fetchedAt:cache,listedAt:date}));
-const d={meta:{schema:1,version:Number(date.replaceAll('-','')),generatedAt:cache,count:brands.length,scope:'Verified KFTC public catalog records; undisclosed money fields omitted',country:'South Korea',currency:'KRW',feeCoverageRequired:false,coverage:{catalogFieldsVerified:brands.length,withFranchiseFee:0,withTotalInvestment:0,withRoyalty:0,withBranches:0},sources:[{id:'kftc',name:'공정거래위원회 가맹사업정보제공시스템',url:LIST}],asofMax:date},brands};if(brands.length<100)throw Error('Too few rows');fs.mkdirSync('docs/data',{recursive:true});fs.writeFileSync(out,JSON.stringify(d));if(!process.argv.includes('--out'))fs.writeFileSync('docs/data/meta.json',JSON.stringify(makeMeta(d,JSON.stringify(d),cache),null,1)+'\n');console.log(`${brands.length} verified KFTC brands`);
+import fs from 'node:fs';
+import { makeBrand,parseBrandList,LIST } from './scraper-lib.mjs';
+import { makeMeta } from './weekly-lib.mjs';
+const args=process.argv.slice(2),out=args.includes('--out')?args[args.indexOf('--out')+1]:'docs/data/brands.json';
+const info=fs.existsSync('tools/data/cache/listing-meta.json')?JSON.parse(fs.readFileSync('tools/data/cache/listing-meta.json')):{};
+const fetchedAt=info.fetchedAt||new Date().toISOString(),listedAt=process.env.KFTC_LIST_DATE||info.listedAt||new Date().toISOString().slice(0,10);
+const rows=parseBrandList(fs.readFileSync('tools/data/cache/latest-list.html','utf8'));
+const brands=[...new Map(rows.map(x=>[x.registrationNo,x])).values()].map(x=>makeBrand(x,{fetchedAt,listedAt}));
+if(brands.length<100)throw Error('Too few rows');
+const d={meta:{schema:1,version:Number(listedAt.replaceAll('-','')),generatedAt:fetchedAt,count:brands.length,scope:'Verified KFTC public catalog records; undisclosed money fields omitted',country:'South Korea',currency:'KRW',feeCoverageRequired:false,coverage:{catalogFieldsVerified:brands.length,withFranchiseFee:0,withTotalInvestment:0,withRoyalty:0,withBranches:0},sources:[{id:'kftc',name:'공정거래위원회 가맹사업정보제공시스템',url:LIST}],asofMax:listedAt},brands};
+fs.mkdirSync('docs/data',{recursive:true});fs.writeFileSync(out,JSON.stringify(d));
+if(!args.includes('--out'))fs.writeFileSync('docs/data/meta.json',JSON.stringify(makeMeta(d,JSON.stringify(d),fetchedAt),null,1)+'\n');
+console.log(`${brands.length} verified KFTC brands`);
