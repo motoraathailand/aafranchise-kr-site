@@ -1,9 +1,12 @@
 name: Deploy site to GitHub Pages
 on:
-  push: {branches: [main]}
+  push:
+    branches: [main]
+    paths: ['docs/**']
   workflow_dispatch: {}
+  workflow_call: {}
 permissions: {contents: read, pages: write, id-token: write}
-concurrency: {group: aa-kr-live-pages, cancel-in-progress: false}
+concurrency: {group: pages, cancel-in-progress: false}
 jobs:
   deploy:
     environment: {name: github-pages, url: '${{ steps.upload.outputs.page_url }}'}

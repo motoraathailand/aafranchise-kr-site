@@ -17,7 +17,6 @@ on:
 
 permissions:
   contents: write
-  pages: write
 
 concurrency:
   group: brand-data
@@ -25,6 +24,8 @@ concurrency:
 
 jobs:
   refresh:
+    outputs:
+      heartbeat: ${{ steps.refresh.outputs.heartbeat }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -65,8 +66,6 @@ jobs:
           CHANGED: ${{ steps.refresh.outputs.changed }}
         run: |
           BASE="https://motoraathailand.github.io/aafranchise-kr-site/data"
-          # Static docs/ requires no Jekyll branch build.
-          if [ "$i" = 1 ]; then gh workflow run deploy-static.yml --repo "${{ github.repository }}"; fi
           for i in $(seq 1 40); do
             m=$(curl -fsS "$BASE/meta.json?cb=$RANDOM$i" | python3 -c 'import sys,json;d=json.load(sys.stdin);print(d["version"],d.get("checkedAt",""))' 2>/dev/null || echo "none")
             echo "try $i: live meta = $m (want $WANT $CHK)"
@@ -86,3 +85,9 @@ jobs:
             sleep 20
           done
           echo "::error::live URL did not serve version $WANT / checkedAt $CHK within ~13 minutes"; exit 1
+
+  # One Pages pipeline and one queue; called only after this data commit is on main.
+  deploy:
+    needs: refresh
+    if: needs.refresh.outputs.heartbeat == 'true'
+    uses: ./.github/workflows/pages.yml
