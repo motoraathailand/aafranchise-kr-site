@@ -77,7 +77,10 @@ jobs:
       cancel-in-progress: false
     runs-on: ubuntu-latest
     steps:
+      # refresh commits within this same run; checkout the resulting main, not the original event SHA.
       - uses: actions/checkout@v4
+        with:
+          ref: main
       - uses: actions/configure-pages@v5
       - uses: actions/upload-pages-artifact@v4
         with: {path: docs}
