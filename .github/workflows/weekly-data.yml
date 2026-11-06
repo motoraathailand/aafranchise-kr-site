@@ -63,7 +63,7 @@ jobs:
   # Pages and live verification form one serialized job after the collection commit.
   deploy:
     needs: refresh
-    if: needs.refresh.outputs.heartbeat == 'true'
+    if: always() && needs.refresh.outputs.heartbeat == 'true'
     uses: ./.github/workflows/pages.yml
     with:
       want: ${{ needs.refresh.outputs.want }}
