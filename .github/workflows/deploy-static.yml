@@ -1,0 +1,17 @@
+name: Deploy site to GitHub Pages
+on:
+  push: {branches: [main]}
+  workflow_dispatch: {}
+permissions: {contents: read, pages: write, id-token: write}
+concurrency: {group: aa-kr-live-pages, cancel-in-progress: false}
+jobs:
+  deploy:
+    environment: {name: github-pages, url: '${{ steps.upload.outputs.page_url }}'}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with: {path: docs}
+      - id: upload
+        uses: actions/deploy-pages@v5
