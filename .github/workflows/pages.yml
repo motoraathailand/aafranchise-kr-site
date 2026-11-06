@@ -27,7 +27,7 @@ jobs:
         env:
           WANT: "${{ inputs.want }}"
           COUNT: "${{ inputs.count }}"
-          CHK: "${{ inputs.checked }}"}
+          CHK: "${{ inputs.checked }}"
         run: |
           BASE=https://motoraathailand.github.io/aafranchise-kr-site/data
           for i in $(seq 1 40); do
