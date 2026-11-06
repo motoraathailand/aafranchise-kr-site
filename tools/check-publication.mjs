@@ -4,7 +4,10 @@ const index=process.argv.indexOf('--bundle');const file=index>=0?process.argv[in
 if(!process.argv.includes('--bundle')){
  for(const f of ['src/strings.mjs','src/content.mjs','tools/scraper/api-catalog.mjs','tools/scraper/build-brands.mjs','tools/scraper/fetch.mjs','tools/scraper/weekly-lib.mjs','tools/web/data-validate.js','tools/weekly-refresh.mjs'])if(!fs.existsSync(f))throw new Error('Missing publication tool '+f);
 }
-const data=JSON.parse(fs.readFileSync(file,'utf8'));if(data.brands.length!==data.meta.count)throw new Error('Catalog count mismatch');
+import {decodeEntities} from './scraper/text-entities.mjs';
+const data=JSON.parse(fs.readFileSync(file,'utf8'));
+const findEntity=(v)=>{if(typeof v==='string')return decodeEntities(v)!==v;if(v&&typeof v==='object')return Object.values(v).some(findEntity);return false};
+if(findEntity(data))throw new Error('HTML entities remain in a published string');if(data.brands.length!==data.meta.count)throw new Error('Catalog count mismatch');
 if(data.meta.currency!=='KRW'||data.meta.referenceYear!==2025)throw new Error('Wrong year/currency');
 const c=data.meta.coverage;for(const k of ['withFranchiseFee','withEducationFee','withDeposit','withOtherStartupCost','withTotalInvestment','withBranches','withAverageSales','withRoyalty'])if(!Number.isInteger(c[k]))throw new Error('Missing coverage '+k);
 if(data.meta.conflictingAmountRows!==undefined)throw new Error('Conflicting amounts cannot be published');

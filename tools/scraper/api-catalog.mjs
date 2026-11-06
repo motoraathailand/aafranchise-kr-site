@@ -10,6 +10,7 @@ import fs from 'node:fs';
 import { setTimeout as sleep } from 'node:timers/promises';
 import { createHash } from 'node:crypto';
 import { UA } from './scraper-lib.mjs';
+import { decodeTextDeep } from './text-entities.mjs';
 export const LIST_DOC = 'https://www.data.go.kr/data/15125467/openapi.do';
 export const MONEY_DOC = 'https://www.data.go.kr/data/15110265/openapi.do';
 export const LIST_API = 'https://apis.data.go.kr/1130000/FftcBrandRlsInfo2_Service/getBrandinfo';
@@ -59,6 +60,8 @@ async function collectKind(kind, url, year, key, fields, cache) {
   return all;
 }
 export function buildCatalog(listRows, moneyRows, { now = new Date().toISOString(), version, groupFor }) {
+  // Decode every source text field before matching/indexing, not merely at display time.
+  listRows = decodeTextDeep(listRows); moneyRows = decodeTextDeep(moneyRows);
   const seen = new Set(), brands = [], rejected = [];
   const amounts = new Map(), conflicts = [];
   const moneyYears = new Set(moneyRows.map((r) => String(r.yr)));

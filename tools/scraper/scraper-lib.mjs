@@ -2,10 +2,11 @@
 import fs from 'node:fs';
 import path from 'node:path';
 import { setTimeout as sleep } from 'node:timers/promises';
+import { decodeEntities } from './text-entities.mjs';
 export const FTC = 'https://franchise.ftc.go.kr';
 export const LIST = `${FTC}/mnu/00013/program/userRqst/list.do`;
 export const UA = process.env.FTC_USER_AGENT || 'AAFranchiseKR/0.1 (public Korean franchise catalog; motoraathailand@gmail.com)';
-export const clean = (s = '') => String(s).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, ' ').replaceAll('&nbsp;', ' ').replaceAll('&amp;', '&').replaceAll('&#039;', "'").replaceAll('&quot;', '"').replace(/&#(\d+);/g, (_, n) => String.fromCodePoint(Number(n))).replace(/\s+/g, ' ').trim();
+export const clean = (s = '') => decodeEntities(String(s).replace(/<script\b[^>]*>[\s\S]*?<\/script>/gi, '').replace(/<[^>]*>/g, ' ')).replace(/\s+/g, ' ').trim();
 export function parseBrandList(html) {
   const allowed = /^(\d{8,12})$/;
   return [...html.matchAll(/<tr>([\s\S]*?)<\/tr>/g)].map((m) => [...m[1].matchAll(/<td\b[^>]*>([\s\S]*?)<\/td>/g)].map((x) => clean(x[1]))).filter((r) => /^\d+$/.test(r[0] || '') && allowed.test(r[4] || '')).map((r) => ({ listingOrder: Number(r[0]), company: r[1], nameKo: r[2], registrationNo: r[4], firstRegisteredAt: (r[5] || '').replaceAll('.', '-'), categoryKo: r[6].trim() }));
