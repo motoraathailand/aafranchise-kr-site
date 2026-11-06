@@ -25,11 +25,6 @@ concurrency:
 
 jobs:
   refresh:
-    outputs:
-      checked: ${{ steps.refresh.outputs.checkedAt }}
-      count: ${{ steps.refresh.outputs.count }}
-      want: ${{ steps.refresh.outputs.version }}
-      heartbeat: ${{ steps.refresh.outputs.heartbeat }}
     runs-on: ubuntu-latest
     timeout-minutes: 20
     steps:
@@ -61,12 +56,42 @@ jobs:
           git pull --rebase -q origin main
           git push origin HEAD:main
   # Pages and live verification form one serialized job after the collection commit.
+
   deploy:
     needs: refresh
-    if: always() && needs.refresh.outputs.heartbeat == 'true'
-    uses: ./.github/workflows/pages.yml
-    with:
-      want: ${{ needs.refresh.outputs.want }}
-      count: ${{ needs.refresh.outputs.count }}
-      checked: ${{ needs.refresh.outputs.checked }}
-    secrets: inherit
+    if: needs.refresh.outputs.heartbeat == 'true'
+    environment:
+      name: github-pages
+      url: ${{ steps.upload.outputs.page_url }}
+    permissions:
+      contents: read
+      pages: write
+      id-token: write
+    concurrency:
+      group: pages
+      cancel-in-progress: false
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/configure-pages@v5
+      - uses: actions/upload-pages-artifact@v4
+        with: {path: docs}
+      - id: upload
+        uses: actions/deploy-pages@v5
+      - name: Verify deployed public data
+        env:
+          WANT: "${{ needs.refresh.outputs.version }}"
+          COUNT: "${{ needs.refresh.outputs.count }}"
+        run: |
+          BASE=https://motoraathailand.github.io/aafranchise-kr-site/data
+          for i in $(seq 1 40); do
+            m="$(curl -fsS "$BASE/meta.json?cb=$RANDOM$i" | python3 -c 'import json,sys;j=json.load(sys.stdin);print(j["version"])' || echo none)"
+            echo "live check $i: $m / want $WANT"
+            if [ "$m" = "$WANT" ]; then
+              curl -fsS -D /tmp/h "$BASE/brands.json?cb=$RANDOM" -o /tmp/b.json
+              node -e 'const b=require("/tmp/b.json");if(b.meta.version!==Number(process.env.WANT)||b.brands.length!==Number(process.env.COUNT))process.exit(1)'
+              grep -qi "access-control-allow-origin: \*" /tmp/h && exit 0; exit 1
+            fi
+            sleep 20
+          done
+          exit 1
