@@ -1,0 +1,1 @@
+{ "name": "aafranchise-data-tools", "private": true, "type": "module", "description": "Weekly brand data refresh (run by .github/workflows/weekly-data.yml). Node 20+, no dependencies." }

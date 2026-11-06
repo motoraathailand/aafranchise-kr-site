@@ -1,0 +1,14 @@
+{
+  "_about": "THE ONE PLACE for the site's links and facts. Edit here, then run: node scripts/build.mjs and push.",
+  "siteUrl": "https://motoraathailand.github.io/aafranchise-kr-site",
+  "packageName": "com.motoraa.franchisekr",
+  "groupEmail": "motoraathailand@gmail.com",
+  "groupUrl": "mailto:motoraathailand@gmail.com?subject=AA%20Franchise%20KR%20tester",
+  "optInUrl": "https://play.google.com/apps/testing/com.motoraa.franchisekr",
+  "installUrl": "https://play.google.com/store/apps/details?id=com.motoraa.franchisekr",
+  "contactEmail": "motoraathailand@gmail.com",
+  "operator": "Pornnarai Tananchai",
+  "policyDate": "2026-11-06",
+  "optInLive": false,
+  "_optInLive": "false = the Play opt-in/install links are not live yet: steps 2-3 on /join are dimmed and a note says they open when testing starts (step 1, the shared group, always works). Set true as soon as the closed test is published (Play Console > Testing > Closed testing > 'Available to testers'), then rebuild + push."
+}

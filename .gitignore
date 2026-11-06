@@ -1,0 +1,4 @@
+tools/data/
+.next-brands.json
+node_modules/
+.DS_Store
