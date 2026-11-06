@@ -45,10 +45,18 @@ export function groupFor(category) {
   return 'other';
 }
 export function makeBrand(row, { fetchedAt, listedAt, extras = {} } = {}) {
-  if (!/^\d{8,12}$/.test(row.registrationNo) || !row.nameKo || !row.firstRegisteredAt) throw new Error('Invalid official brand row');
+  if (!/^\d{8,12}$/.test(row.registrationNo) || !row.nameKo || row.nameKo.includes('�') || !row.firstRegisteredAt) throw new Error('Invalid official brand row');
   const q = new URLSearchParams({ searchCondition: 'brd', searchKeyword: row.nameKo });
   const name = { ko: row.nameKo.trim() };
   // Korean and English parenthetical names are source spellings, not machine-translated names.
   const m = /\(([A-Za-z0-9][^()]*)\)/.exec(row.nameKo); if (m) name.en = m[1];
-  return { id: `kr${row.registrationNo}`, name, group: groupFor(row.categoryKo), category: { ko: row.categoryKo }, country: 'South Korea', registrationNo: row.registrationNo, firstRegistrationAt: row.firstRegisteredAt, contact: { company: row.company }, sources: [{ id: 'kftc', site: '공정거래위원회 가맹사업정보제공시스템', url: `${LIST}?${q}`, fetchedAt, asof: listedAt, reference: '정보공개서 열람 목록의 최초등록일·업종' }], ...extras };
+  const extraSources=[];
+  // KFTC itself renders this label as ??돈까스 in list+exact-registration lookup.
+  // The official brand site confirms ① consistent company ② exact public brand spelling; no cost inference.
+  if(row.registrationNo==='20170517' && row.nameKo==='??돈까스'){
+    name.ko='쑝쑝돈까스';
+    extraSources.push({id:'brand-sspc',site:'쑝쑝돈까스 공식 브랜드',url:'https://sspc.co.kr/menu',fetchedAt,asof:listedAt,reference:'공식 목록 ??돈까스 손상글자 보정 — 동일 법인 에스에스피씨, 회사 브랜드 쑝쑝돈까스'});
+  }
+
+  return { id: `kr${row.registrationNo}`, name, group: groupFor(row.categoryKo), category: { ko: row.categoryKo }, country: 'South Korea', registrationNo: row.registrationNo, firstRegistrationAt: row.firstRegisteredAt, contact: { company: row.company }, sources: [{ id: 'kftc', site: '공정거래위원회 가맹사업정보제공시스템', url: `${LIST}?${q}`, fetchedAt, asof: listedAt, reference: '정보공개서 열람 목록의 최초등록일·업종' }], ...extras, ...(extraSources.length?{sources:[{ id: 'kftc', site: '공정거래위원회 가맹사업정보제공시스템', url: `${LIST}?${q}`, fetchedAt, asof: listedAt, reference: '정보공개서 엔 목록의 최초등록일·업종' },...extraSources]}:{} ) };
 }

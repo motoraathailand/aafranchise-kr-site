@@ -7,7 +7,7 @@ if(!prev.meta.scope?.includes('KFTC'))prev={meta:{version:0},brands:[]};
 const run=a=>{const r=spawnSync(process.execPath,a,{cwd:ROOT,stdio:'inherit'});if(r.status!==0)process.exit(r.status||1)};
 if(!args.includes('--no-scrape'))run(['tools/scraper/fetch.mjs','--refresh']);
 run(['tools/scraper/enrich-api.mjs']);run(['tools/scraper/build-brands.mjs','--out',T]);let next=JSON.parse(fs.readFileSync(T));
-if(next.meta.version<=prev.meta.version)next={...next,meta:{...next.meta,version:Math.max(next.meta.version,prev.meta.version+1)}};
+next={...next,meta:{...next.meta,version:Math.max(Date.parse(new Date().toISOString().slice(0,10))>=Date.parse(prev.meta.asofMax)?Number(new Date().toISOString().slice(0,10).replaceAll('-','')):prev.meta.version+1,prev.meta.version+1)}};
 const errs=sanity(prev,next);if(errs.length){console.error(errs.join('\n'));process.exit(1)}
 const d=diffData(prev,next),changed=d.any||force,text=JSON.stringify(next),checkedAt=new Date().toISOString(),m=makeMeta(next,text,checkedAt);
 if(!changed){m.version=prev.meta.version;m.generatedAt=prev.meta.generatedAt;m.asofMax=prev.meta.asofMax;m.sha256=makeMeta(prev,JSON.stringify(prev)).sha256}
